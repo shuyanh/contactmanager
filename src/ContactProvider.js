@@ -37,6 +37,7 @@ const reducer = (state, action) => {
 export class Provider extends Component {
 	state = {
 		contacts: [],
+		loaded: false,
 		dispatch: (action) => {
 			this.setState((state) => reducer(state, action));
 		},
@@ -44,7 +45,7 @@ export class Provider extends Component {
 
 	async componentDidMount() {
 		const res = await axios.get('https://jsonplaceholder.typicode.com/users');
-		this.setState({ contacts: res.data });
+		this.setState({ contacts: res.data, loaded: true });
 	}
 	render() {
 		return (

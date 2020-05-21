@@ -8,7 +8,8 @@ class Contacts extends Component {
 			<Consumer>
 				{(value) => {
 					const contacts = value.contacts;
-					return (
+					const loaded = value.loaded;
+					return loaded ? (
 						<React.Fragment>
 							<h1 className='display-4 mb-2'>
 								<span className='text-danger'>Contact</span> List
@@ -17,6 +18,8 @@ class Contacts extends Component {
 								<Contact key={contact.id} contact={contact} />
 							))}
 						</React.Fragment>
+					) : (
+						<p>Loading....</p>
 					);
 				}}
 			</Consumer>

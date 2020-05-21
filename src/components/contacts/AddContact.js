@@ -10,6 +10,7 @@ class AddContact extends Component {
 		phone: '',
 		email: '',
 		errors: {},
+		adding: false,
 	};
 	handleChange = (e) => {
 		// e.preventDefault();
@@ -20,6 +21,8 @@ class AddContact extends Component {
 	};
 
 	handleSubmit = async (dispatch, e) => {
+		this.setState({ adding: true });
+
 		e.preventDefault();
 		console.log('lets add this contact: ', this.state);
 		const { name, email, phone } = this.state;
@@ -65,17 +68,20 @@ class AddContact extends Component {
 			email: '',
 			phone: '',
 			errors: {},
+			adding: false,
 		});
 		this.props.history.push('/');
 	};
 	render() {
-		const { name, email, phone, errors } = this.state;
+		const { name, email, phone, errors, adding } = this.state;
 
 		return (
 			<Consumer>
 				{(value) => {
 					const { dispatch } = value;
-					return (
+					return adding ? (
+						<p>Adding</p>
+					) : (
 						<div className='card mb-3'>
 							<div className='card-header'>Add Contact</div>
 							<div className='card-body'>
