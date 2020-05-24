@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Consumer } from '../../ContactProvider';
+
 // import { v1 as uuid } from 'uuid';
 import TextInputGroup from '../layout/TextInputGroup';
 import axios from 'axios';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { addContact } from '../../actions/contactActions';
 
 class AddContact extends Component {
 	state = {
@@ -20,7 +23,7 @@ class AddContact extends Component {
 		});
 	};
 
-	handleSubmit = async (dispatch, e) => {
+	handleSubmit = (e) => {
 		this.setState({ adding: true });
 
 		e.preventDefault();
@@ -57,11 +60,13 @@ class AddContact extends Component {
 			email,
 			phone,
 		};
-		const res = await axios.post(
-			'https://jsonplaceholder.typicode.com/users',
-			newContact
-		);
-		dispatch({ type: 'ADD_CONTACT', payload: res.data });
+		// const res = await axios.post(
+		// 	'https://jsonplaceholder.typicode.com/users',
+		// 	newContact
+		// );
+		this.props.addContact(newContact);
+
+		// dispatch({ type: 'ADD_CONTACT', payload: res.data });
 
 		this.setState({
 			name: '',
@@ -76,54 +81,48 @@ class AddContact extends Component {
 		const { name, email, phone, errors, adding } = this.state;
 
 		return (
-			<Consumer>
-				{(value) => {
-					const { dispatch } = value;
-					return adding ? (
-						<p>Adding</p>
-					) : (
-						<div className='card mb-3'>
-							<div className='card-header'>Add Contact</div>
-							<div className='card-body'>
-								<form onSubmit={this.handleSubmit.bind(this, dispatch)}>
-									<TextInputGroup
-										label='Name'
-										name='name'
-										value={name}
-										placeholder='Enter name here'
-										onChange={this.handleChange}
-										error={errors.name}
-									></TextInputGroup>
-									<TextInputGroup
-										label='Email'
-										name='email'
-										type='email'
-										value={email}
-										placeholder='Enter email here'
-										onChange={this.handleChange}
-										error={errors.email}
-									></TextInputGroup>
-									<TextInputGroup
-										label='Phone'
-										name='phone'
-										value={phone}
-										placeholder='Enter phone here'
-										onChange={this.handleChange}
-										error={errors.phone}
-									></TextInputGroup>
-									<input
-										type='submit'
-										value='add contact'
-										className='btn btn-light btn-block'
-									></input>
-								</form>
-							</div>
-						</div>
-					);
-				}}
-			</Consumer>
+			<div className='card mb-3'>
+				<div className='card-header'>Add Contact</div>
+				<div className='card-body'>
+					<form onSubmit={this.handleSubmit.bind(this)}>
+						<TextInputGroup
+							label='Name'
+							name='name'
+							value={name}
+							placeholder='Enter name here'
+							onChange={this.handleChange}
+							error={errors.name}
+						></TextInputGroup>
+						<TextInputGroup
+							label='Email'
+							name='email'
+							type='email'
+							value={email}
+							placeholder='Enter email here'
+							onChange={this.handleChange}
+							error={errors.email}
+						></TextInputGroup>
+						<TextInputGroup
+							label='Phone'
+							name='phone'
+							value={phone}
+							placeholder='Enter phone here'
+							onChange={this.handleChange}
+							error={errors.phone}
+						></TextInputGroup>
+						<input
+							type='submit'
+							value='add contact'
+							className='btn btn-light btn-block'
+						></input>
+					</form>
+				</div>
+			</div>
 		);
 	}
 }
 
-export default AddContact;
+AddContact.propTypes = {
+	addContact: PropTypes.func.isRequired,
+};
+export default connect(null, { addContact })(AddContact);

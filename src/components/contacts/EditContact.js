@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Consumer } from '../../ContactProvider';
+
 // import { v1 as uuid } from 'uuid';
 import TextInputGroup from '../layout/TextInputGroup';
 import axios from 'axios';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { getContact, updateContact } from '../../actions/contactActions';
 
 class EditContact extends Component {
 	state = {
@@ -12,17 +15,18 @@ class EditContact extends Component {
 		errors: {},
 	};
 
+	componentWillReceiveProps(nextProps, nextState) {
+		const { name, email, phone } = nextProps.contact;
+		this.setState({
+			name,
+			email,
+			phone,
+		});
+	}
+
 	async componentDidMount() {
 		const { id } = this.props.match.params;
-		const res = await axios.get(
-			`https://jsonplaceholder.typicode.com/users/${id}`
-		);
-		const contact = res.data;
-		this.setState({
-			name: contact.name,
-			email: contact.email,
-			phone: contact.phone,
-		});
+		this.props.getContact(id);
 	}
 	handleChange = (e) => {
 		// e.preventDefault();
@@ -32,10 +36,10 @@ class EditContact extends Component {
 		});
 	};
 
-	handleSubmit = async (dispatch, e) => {
+	handleSubmit = (e) => {
 		e.preventDefault();
-		console.log('lets add this contact: ', this.state);
-		const { name, email, phone } = this.state;
+		const { name, phone, email } = this.state;
+		// console.log('lets add this contact: ', this.state);
 
 		if (name === '') {
 			this.setState({
@@ -61,20 +65,18 @@ class EditContact extends Component {
 			});
 			return;
 		}
+
+		const { id } = this.props.match.params;
+
 		const updatedContact = {
-			// id: uuid(),
+			id,
 			name,
 			email,
 			phone,
 		};
 
-		const { id } = this.props.match.params;
-
-		const res = await axios.put(
-			`https://jsonplaceholder.typicode.com/users/${id}`,
-			updatedContact
-		);
-		dispatch({ type: 'UPDATE_CONTACT', payload: res.data });
+		console.log('calling udpateContact: ', updatedContact);
+		this.props.updateContact(updatedContact);
 
 		this.setState({
 			name: '',
@@ -86,54 +88,58 @@ class EditContact extends Component {
 	};
 	render() {
 		const { name, email, phone, errors } = this.state;
+		// const { errors } = this.state;
 
 		return (
-			<Consumer>
-				{(value) => {
-					const { dispatch } = value;
-					return (
-						<div className='card mb-3'>
-							<div className='card-header'>Edit Contact</div>
-							<div className='card-body'>
-								<form onSubmit={this.handleSubmit.bind(this, dispatch)}>
-									<TextInputGroup
-										label='Name'
-										name='name'
-										value={name}
-										placeholder='Enter name here'
-										onChange={this.handleChange}
-										error={errors.name}
-									></TextInputGroup>
-									<TextInputGroup
-										label='Email'
-										name='email'
-										type='email'
-										value={email}
-										placeholder='Enter email here'
-										onChange={this.handleChange}
-										error={errors.email}
-									></TextInputGroup>
-									<TextInputGroup
-										label='Phone'
-										name='phone'
-										value={phone}
-										placeholder='Enter phone here'
-										onChange={this.handleChange}
-										error={errors.phone}
-									></TextInputGroup>
-									<input
-										type='submit'
-										value='Edit contact'
-										className='btn btn-light btn-block'
-									></input>
-								</form>
-							</div>
-						</div>
-					);
-				}}
-			</Consumer>
+			<div className='card mb-3'>
+				<div className='card-header'>Edit Contact</div>
+				<div className='card-body'>
+					<form onSubmit={this.handleSubmit.bind(this)}>
+						<TextInputGroup
+							label='Name'
+							name='name'
+							value={name}
+							placeholder='Enter name here'
+							onChange={this.handleChange}
+							error={errors.name}
+						></TextInputGroup>
+						<TextInputGroup
+							label='Email'
+							name='email'
+							type='email'
+							value={email}
+							placeholder='Enter email here'
+							onChange={this.handleChange}
+							error={errors.email}
+						></TextInputGroup>
+						<TextInputGroup
+							label='Phone'
+							name='phone'
+							value={phone}
+							placeholder='Enter phone here'
+							onChange={this.handleChange}
+							error={errors.phone}
+						></TextInputGroup>
+						<input
+							type='submit'
+							value='Edit contact'
+							className='btn btn-light btn-block'
+						></input>
+					</form>
+				</div>
+			</div>
 		);
 	}
 }
 
-export default EditContact;
+EditContact.propTypes = {
+	contact: PropTypes.object.isRequired,
+	getContact: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+	contact: state.contactReducer.contact,
+});
+export default connect(mapStateToProps, { getContact, updateContact })(
+	EditContact
+);
